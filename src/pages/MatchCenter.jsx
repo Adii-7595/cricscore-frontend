@@ -1,5 +1,9 @@
-function MatchCenter() {
-    return <h1>Match Center</h1>;
-}
+const MatchCenter = () => {
+  return (
+    <div className="page">
+      <h2>Match Center</h2>
+    </div>
+  );
+};
 
 export default MatchCenter;

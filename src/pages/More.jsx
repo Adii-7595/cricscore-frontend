@@ -1,5 +1,9 @@
-function More() {
-    return <h1>More Page</h1>;
-}
+const More = () => {
+  return (
+    <div className="page">
+      <h2>More Page</h2>
+    </div>
+  );
+};
 
 export default More;
