@@ -5,12 +5,52 @@ import {
     getMatchDetails
 } from "../services/matchService";
 
+// Pulls every inngsN key present on a team's score object, in innings order.
+// Works for any number of innings (1 for limited-overs, up to 2 for tests)
+// without hardcoding inngs1 / inngs2.
+const collectInnings = (teamScore) => {
+
+    if (!teamScore) {
+
+        return [];
+
+    }
+
+    return Object.keys(teamScore)
+
+        .filter((key) => key.startsWith("inngs"))
+
+        .sort((a, b) => {
+
+            const aNum = parseInt(a.replace("inngs", ""), 10);
+            const bNum = parseInt(b.replace("inngs", ""), 10);
+
+            return aNum - bNum;
+
+        })
+
+        .map((key) => {
+
+            const innings = teamScore[key];
+
+            return {
+
+                runs: innings?.runs,
+
+                wickets: innings?.wickets,
+
+                overs: innings?.overs
+
+            };
+
+        });
+
+};
+
 const useMatches = (status) => {
 
     const [matches, setMatches] = useState([]);
-
     const [loading, setLoading] = useState(true);
-
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -20,63 +60,127 @@ const useMatches = (status) => {
             try {
 
                 setLoading(true);
-
                 setError(null);
 
                 const data = await getMatches(status);
 
                 const matchList = data.matches || [];
 
-                if (matchList.length > 0) {
+                const enrichedMatches = await Promise.all(
 
-                    const details = await getMatchDetails(matchList[0].matchId);
+                    matchList.map(async (match) => {
 
-                    const matchData = details.match;
-                    console.log(Object.keys(matchData));
-                    console.log(matchData.matchInfoData.team1);
-                    console.log(matchData.matchInfoData.team2);
+                        try {
 
-                    const innings =
-                        matchData?.commentaryData?.miniscore?.inningsscores?.inningsscore || [];
+                            const details = await getMatchDetails(match.matchId);
 
-                    const scoreMap = {};
+                            // rawData is the source of truth - matchInfoData /
 
-                    innings.forEach((inning) => {
+                            // top-level enrichment can be null when enrichment
 
-                        scoreMap[inning.batteamid] = {
-                            runs: inning.runs,
-                            wickets: inning.wickets,
-                            overs: inning.overs
-                        };
+                            // hasn't completed, but rawData is always present.
 
-                    });
+                            const raw = details.match?.rawData;
 
-                    const featuredMatch = {
+                            const info = raw?.matchInfo;
 
-                        ...matchList[0],
+                            const score = raw?.matchScore || {};
 
-                        team1Id: matchData.matchInfoData.team1.teamid,
+                            const matchFormat = info?.matchFormat || "";
 
-                        team2Id: matchData.matchInfoData.team2.teamid,
-                        
+                            const isTest =
 
-                        scoreMap
+                                matchFormat.toUpperCase() === "TEST";
 
-                    };
+                            const team1Innings = collectInnings(
 
-                    setMatches([featuredMatch]);
+                                score.team1Score
 
-                } else {
+                            );
 
-                    setMatches([]);
+                            const team2Innings = collectInnings(
 
-                }
+                                score.team2Score
+
+                            );
+
+                            return {
+
+                                matchId: match.matchId,
+
+                                series: match.series,
+
+                                state: match.state,
+
+                                status: match.status,
+
+                                matchFormat,
+
+                                isTest,
+
+                                team1: {
+
+                                    name: info?.team1?.teamName || match.team1,
+
+                                    imageId: info?.team1?.imageId,
+
+                                    innings: team1Innings
+
+                                },
+
+                                team2: {
+
+                                    name: info?.team2?.teamName || match.team2,
+
+                                    imageId: info?.team2?.imageId,
+
+                                    innings: team2Innings
+
+                                }
+
+                            };
+
+                        }
+
+                        catch {
+
+                            return {
+
+                                matchId: match.matchId,
+
+                                series: match.series,
+
+                                state: match.state,
+
+                                status: match.status,
+
+                                matchFormat: "",
+
+                                isTest: false,
+
+                                team1: {
+                                    name: match.team1,
+                                    innings: []
+                                },
+
+                                team2: {
+                                    name: match.team2,
+                                    innings: []
+                                }
+
+                            };
+
+                        }
+
+                    })
+
+                );
+
+                setMatches(enrichedMatches);
 
             }
 
             catch (err) {
-
-                console.error(err);
 
                 setError(err);
 
@@ -97,9 +201,7 @@ const useMatches = (status) => {
     return {
 
         matches,
-
         loading,
-
         error
 
     };

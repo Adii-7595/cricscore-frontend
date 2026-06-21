@@ -19,12 +19,12 @@ const SectionHeader = ({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                mb: 3
+                mb: 2
             }}
         >
 
             <Typography
-                variant="h4"
+                variant="h3"
                 fontWeight={700}
             >
                 {title}

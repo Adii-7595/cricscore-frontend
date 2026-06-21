@@ -1,14 +1,15 @@
-import HeroBanner from "../../components/home/HeroBanner";
-import MatchSection from "../../components/home/MatchSection";
-
+import HeroBanner from "../../components/hero/HeroBanner";
+import MatchSection from "../../components/match/MatchSection";
 
 const Home = () => {
 
     return (
 
         <>
+
             <HeroBanner />
             <MatchSection />
+            
 
 
         </>

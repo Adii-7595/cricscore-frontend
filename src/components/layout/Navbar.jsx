@@ -1,198 +1,229 @@
 import { useState } from "react";
+
 import {
     AppBar,
     Toolbar,
     Typography,
     Button,
+    Stack,
     IconButton,
     Drawer,
     List,
     ListItemButton,
     ListItemText,
     Box,
-    useMediaQuery
+    Container
 } from "@mui/material";
 
-import { useTheme } from "@mui/material/styles";
-
 import MenuIcon from "@mui/icons-material/Menu";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
 
-import { Link } from "react-router-dom";
+import SportsCricketRoundedIcon from "@mui/icons-material/SportsCricketRounded";
 
-import { useThemeContext } from "../../contexts/ThemeContext";
+import { Link, useLocation } from "react-router-dom";
 
-const pages = [
-    {
-        name: "Home",
-        path: "/"
-    },
-    {
-        name: "News",
-        path: "/news"
-    },
-    {
-        name: "Photos",
-        path: "/photos"
-    },
-    {
-        name: "Tournament",
-        path: "/tournament"
-    }
+const navItems = [
+    { label: "Home", path: "/" },
+    { label: "News", path: "/news" },
+    { label: "Photos", path: "/photos" },
+    { label: "Tournament", path: "/tournament" },
+    { label: "Admin", path: "/admin" }
 ];
 
 const Navbar = () => {
 
-    const theme = useTheme();
-
-    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-    const { mode, toggleTheme } = useThemeContext();
-
     const [open, setOpen] = useState(false);
+
+    const location = useLocation();
+
+    const toggleDrawer = () => {
+
+        setOpen((prev) => !prev);
+
+    };
 
     return (
 
-        <AppBar position="sticky">
+        <AppBar
+            position="sticky"
+            elevation={0}
+            sx={{
+                backgroundColor: "rgba(2,8,23,.92)",
+                backdropFilter: "blur(12px)",
+                borderBottom: "1px solid rgba(255,255,255,.08)"
+            }}
+        >
 
-            <Toolbar>
+            <Container maxWidth="xl">
 
-                <Typography
-                    variant="h5"
+                <Toolbar
+                    disableGutters
                     sx={{
-                        flexGrow: 1,
-                        fontWeight: 700
+                        minHeight: {
+                            xs: 56,
+                            md: 64
+                        },
+                        px: {
+                            xs: 1,
+                            sm: 0
+                        }
                     }}
                 >
 
-                    CricScore
+                    {/* Logo */}
 
-                </Typography>
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        sx={{
+                            flexGrow: 1,
+                            minWidth: 0
+                        }}
+                    >
 
-                {isMobile ? (
+                        <SportsCricketRoundedIcon
+                            color="primary"
+                        />
 
-                    <>
-
-                        <IconButton
-                            color="inherit"
-                            onClick={toggleTheme}
+                        <Typography
+                            variant="h5"
+                            fontWeight={700}
+                            noWrap
+                            sx={{
+                                fontSize: {
+                                    xs: "1.1rem",
+                                    md: "1.5rem"
+                                }
+                            }}
                         >
+                            CricScore
+                        </Typography>
 
-                            {mode === "light"
+                    </Stack>
 
-                                ? <DarkModeIcon />
+                    {/* Desktop Menu */}
 
-                                : <LightModeIcon />}
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{
+                            display: {
+                                xs: "none",
+                                md: "flex"
+                            }
+                        }}
+                    >
 
-                        </IconButton>
+                        {navItems.map((item) => (
 
-                        <IconButton
-                            color="inherit"
-                            onClick={() => setOpen(true)}
-                        >
-
-                            <MenuIcon />
-
-                        </IconButton>
-
-                        <Drawer
-                            anchor="right"
-                            open={open}
-                            onClose={() => setOpen(false)}
-                        >
-
-                            <Box
+                            <Button
+                                key={item.path}
+                                component={Link}
+                                to={item.path}
+                                color="inherit"
                                 sx={{
-                                    width: 250
+                                    borderRadius: 2,
+
+                                    bgcolor:
+                                        location.pathname === item.path
+                                            ? "primary.main"
+                                            : "transparent",
+
+                                    "&:hover": {
+                                        bgcolor: "primary.dark"
+                                    }
                                 }}
                             >
 
-                                <List>
-
-                                    {pages.map((page) => (
-
-                                        <ListItemButton
-
-                                            key={page.name}
-
-                                            component={Link}
-
-                                            to={page.path}
-
-                                            onClick={() => setOpen(false)}
-
-                                        >
-
-                                            <ListItemText
-                                                primary={page.name}
-                                            />
-
-                                        </ListItemButton>
-
-                                    ))}
-
-                                </List>
-
-                            </Box>
-
-                        </Drawer>
-
-                    </>
-
-                ) : (
-
-                    <>
-
-                        {pages.map((page) => (
-
-                            <Button
-
-                                key={page.name}
-
-                                color="inherit"
-
-                                component={Link}
-
-                                to={page.path}
-
-                            >
-
-                                {page.name}
+                                {item.label}
 
                             </Button>
 
                         ))}
 
-                        <IconButton
-                            color="inherit"
-                            onClick={toggleTheme}
-                        >
+                    </Stack>
 
-                            {mode === "light"
+                    {/* Mobile Hamburger */}
 
-                                ? <DarkModeIcon />
+                    <IconButton
+                        color="inherit"
+                        onClick={toggleDrawer}
+                        sx={{
+                            display: {
+                                xs: "flex",
+                                md: "none"
+                            }
+                        }}
+                    >
 
-                                : <LightModeIcon />}
+                        <MenuIcon />
 
-                        </IconButton>
+                    </IconButton>
 
-                        <Button
+                </Toolbar>
 
-                            color="inherit"
-                            component={Link}
-                            to="/admin/login"
-                        >
+            </Container>
 
-                            Admin
+            {/* Drawer */}
 
-                        </Button>
+            <Drawer
+                anchor="left"
+                open={open}
+                onClose={toggleDrawer}
+            >
 
-                    </>
+                <Box
+                    sx={{
+                        width: {
+                            xs: "78vw",
+                            sm: 260
+                        },
+                        maxWidth: 300,
+                        bgcolor: "background.default",
+                        height: "100%"
+                    }}
+                >
 
-                )}
+                    <Typography
+                        variant="h5"
+                        fontWeight={700}
+                        sx={{
+                            p: 3
+                        }}
+                    >
+                        CricScore
+                    </Typography>
 
-            </Toolbar>
+                    <List>
+
+                        {navItems.map((item) => (
+
+                            <ListItemButton
+                                key={item.path}
+                                component={Link}
+                                to={item.path}
+                                selected={
+                                    location.pathname === item.path
+                                }
+                                onClick={toggleDrawer}
+                                sx={{
+                                    py: 1.5
+                                }}
+                            >
+
+                                <ListItemText
+                                    primary={item.label}
+                                />
+
+                            </ListItemButton>
+
+                        ))}
+
+                    </List>
+
+                </Box>
+
+            </Drawer>
 
         </AppBar>
 

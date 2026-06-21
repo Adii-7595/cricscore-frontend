@@ -21,7 +21,9 @@ const Layout = () => {
             <Box
                 component="main"
                 sx={{
-                    flex: 1
+                    flex: 1,
+                    width: "100%"
+
                 }}
             >
 

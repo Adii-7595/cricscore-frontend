@@ -11,6 +11,11 @@ export const getMatches = async (status = "live") => {
 };
 
 export const getMatchDetails = async (matchId) => {
-    const { data } = await api.get(`/cricket/match/${matchId}`);
+
+    const { data } = await api.get(
+        `/cricket/match/${matchId}`
+    );
+
     return data;
+
 };
